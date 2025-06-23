@@ -215,3 +215,11 @@ CHROMA_EXTERNAL_SERVER=True
 
 #### docker 실행
 docker-compose up -d --build
+
+---
+
+## 7. 연락처 및 지원
+
+**프로젝트 담당자**: gorsjsla8459@dnsoft.co.kr
+
+문의사항이나 기술 지원이 필요한 경우 위 이메일로 연락해 주세요.

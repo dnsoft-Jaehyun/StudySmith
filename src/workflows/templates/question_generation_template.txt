@@ -1,0 +1,32 @@
+다음 교육 정보와 내용을 바탕으로 문제를 생성해주세요:
+
+교과: {{subject}}
+학년: {{grade}}
+단원: {{chapter_title}}
+차시: {{lesson_title}}
+문제 유형: {{question_type}}
+
+참고할 내용:
+{{context}}
+
+당신의 임무는 위 교육 자료와 "참고할 내용"에 제공된 PDF 문서 내용을 기반으로 정확하고 교육적인 문제를 만드는 것입니다.
+반드시 참고할 내용의 PDF 문서를 분석하여 실제 내용에 기반한 문제를 생성해주세요.
+
+다음 형식으로 {{num_questions}}개의 문제를 생성해주세요:
+
+[
+  {
+    "id": "unique_id",
+    "question": "문제 내용",
+    "answer": "정답",
+    "options": ["보기1", "보기2", "보기3", "보기4"],
+    "difficulty": "상/중/하",
+    "metadata": {
+      "subject": "{{subject}}",
+      "grade": "{{grade}}",
+      "chapter_title": "{{chapter_title}}",
+      "lesson_title": "{{lesson_title}}",
+      "question_type": "{{question_type}}"
+    }
+  }
+] 

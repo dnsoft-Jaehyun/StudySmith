@@ -1,0 +1,72 @@
+volumes:
+  chroma_data:
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  # ───────────────────────── MAIN APPLICATION (React + Express) ─────────────────────────
+  app:
+    build:
+      context: .
+      target: development
+    container_name: StudySmith
+    restart: unless-stopped
+    ports:
+      - "3000:3000"                # 프론트엔드 (webpack-dev-server)
+      - "8080:8080"                # 백엔드 (Express API)
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - CHROMA_SERVER_URL=http://chroma_server:8000
+      - CHROMA_DB_HOST=chroma_server
+      - CHROMA_DB_PORT=8000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./public:/usr/src/app/public
+      - ./package.json:/usr/src/app/package.json
+      - ./package-lock.json:/usr/src/app/package-lock.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./webpack.config.js:/usr/src/app/webpack.config.js
+    depends_on:
+      chroma_server:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - app-network
+    command: sh -c "npm run dev"
+
+  # ───────────────────────── CHROMA VECTOR DB ──────────────────────────
+  chroma_server:
+    image: chromadb/chroma:0.6.1
+    command: uvicorn chromadb.app:app --host 0.0.0.0 --port 8000 --workers 1
+    container_name: chroma_server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat').getcode()==200 else 1)"]
+      interval: 5s
+    networks:
+      - app-network
+
+  # ───────────────────────── REDIS ──────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis_server
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - app-network
